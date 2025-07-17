@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './ProductList.css';
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import CartItem from './CartItem';
-import {addItem} from './CartSlice';
+import {addItem, removeItem} from './CartSlice';
 
 
 function ProductList({ onHomeClick }) {
@@ -11,6 +11,7 @@ function ProductList({ onHomeClick }) {
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
     const [addedToCart, setAddedToCart] = useState({});
     const [numberItemsOnCart, setNumberItemsOnCart] = useState(0);
+    const CartItems = useSelector(state => state.cart.items);
 
     const dispatch = useDispatch();
 
@@ -264,7 +265,6 @@ function ProductList({ onHomeClick }) {
 
     const handleAddToCart = (product) => {
         dispatch(addItem(product)); // Dispatch the action to add the product to the cart (Redux action)
-        console.log(product);
 
         setAddedToCart((prevState) => ({ // Update the local state to reflect that the product has been added
             ...prevState, // Spread the previous state to retain existing entries
@@ -272,13 +272,20 @@ function ProductList({ onHomeClick }) {
         }));
     };
 
-    useEffect(() => {
-        let total = 0;
-        for (const [key, value] of Object.entries(addedToCart)) {
-            total += 1;
-        }
-        setNumberItemsOnCart(total);
+    const calculateTotalQuantity = () => {
+        return CartItems ? CartItems.reduce((total, item) => total + item.quantity, 0) : 0;
+    };
 
+    const handleRemoveToCart = (product) => {
+        dispatch(removeItem(product));
+        let newList = addedToCart;
+        delete newList[product.name];
+        setAddedToCart(newList);
+        setNumberItemsOnCart(calculateTotalQuantity());
+    };
+
+    useEffect(() => {
+        setNumberItemsOnCart(calculateTotalQuantity());
     }, [addedToCart]);
 
     return (
@@ -321,10 +328,11 @@ function ProductList({ onHomeClick }) {
                                 <div className="product-description">{plant.description}</div> {/* Display plant description */}
                                 <div className="product-cost">{plant.cost}</div> {/* Display plant cost */}
                                 <button
+                                    disabled={addedToCart[plant.name] ? true :false}
                                     className="product-button"
                                     onClick={() => handleAddToCart(plant)} // Handle adding plant to cart
                                 >
-                                    Add to Cart
+                                    {addedToCart[plant.name] ? 'Added to your Cart' : 'Add to Cart'}
                                 </button>
                                 </div>
                             ))}
@@ -333,7 +341,7 @@ function ProductList({ onHomeClick }) {
                         ))}
                 </div>
             ) : (
-                <CartItem onContinueShopping={handleContinueShopping} />
+                <CartItem onContinueShopping={handleContinueShopping} onRemoveItem={handleRemoveToCart} />
             )}
         </div>
     );
