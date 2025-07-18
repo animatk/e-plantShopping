@@ -286,7 +286,7 @@ function ProductList({ onHomeClick }) {
 
     useEffect(() => {
         setNumberItemsOnCart(calculateTotalQuantity());
-    }, [addedToCart]);
+    }, [addedToCart, CartItems]);
 
     return (
         <div>

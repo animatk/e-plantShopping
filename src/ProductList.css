@@ -47,6 +47,13 @@ body {
     align-items: center;
     justify-content: center;
 }
+.product-grid h2 {
+    border-bottom: 2px solid;
+    display: block;
+    margin: 15px auto;
+    padding: 5px 0;
+    width: fit-content;
+}
 .product-list {
     display: flex;
     flex-wrap: wrap;
